@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Formulario - Sistema de Ventas</title>
+  <style>
+    :root{--accent:#2b6cb0;--muted:#6b7280}
+    body{font-family:Inter, system-ui, Arial, sans-serif;background:#f7fafc;color:#111;margin:0;padding:24px}
+    .container{max-width:980px;margin:0 auto;background:#fff;border-radius:10px;padding:20px;box-shadow:0 6px 20px rgba(2,6,23,0.08)}
+    h1{font-size:20px;margin:0 0 12px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text], input[type=email], input[type=number], select, textarea{width:100%;padding:8px 10px;border:1px solid #e6e9ee;border-radius:6px;font-size:14px}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:1fr 1fr}
+    .row{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid #dbeafe}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+    th{color:var(--muted);font-size:12px}
+    .small{font-size:13px;color:var(--muted)}
+    .text-right{text-align:right}
+    .summary{display:flex;gap:20px;justify-content:flex-end;margin-top:12px}
+    .summary .card{background:#f8fafc;padding:12px;border-radius:8px;min-width:180px}
+    .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .badge{background:#eef2ff;color:#3730a3;padding:6px 10px;border-radius:999px;font-size:13px}
+    .error{color:#b91c1c;font-size:13px}
+    @media (max-width:720px){.grid.cols-2{grid-template-columns:1fr} .summary{flex-direction:column;align-items:stretch}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-actions">
+      <h1>Formulario de Venta — Nuevo Documento</h1>
+      <div>
+        <span class="badge">Demo</span>
+      </div>
+    </div>
+
+    <form id="saleForm">
+      <section>
+        <h2 style="font-size:16px;margin:6px 0 10px">Datos del Cliente</h2>
+        <div class="grid cols-2">
+          <div>
+            <label>Nombre completo</label>
+            <input type="text" id="customerName" required placeholder="Ej: Juan Pérez" />
+          </div>
+          <div>
+            <label>Documento / RUC</label>
+            <input type="text" id="customerDoc" placeholder="DNI o RUC" />
+          </div>
+          <div>
+            <label>Correo</label>
+            <input type="email" id="customerEmail" placeholder="correo@ejemplo.com" />
+          </div>
+          <div>
+            <label>Teléfono</label>
+            <input type="text" id="customerPhone" placeholder="987654321" />
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:18px">
+        <h2 style="font-size:16px;margin:6px 0 10px">Detalle de Items</h2>
+
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+          <input type="text" id="searchProduct" placeholder="Buscar producto (demo)" style="flex:1;padding:8px;border:1px solid #e6e9ee;border-radius:8px" />
+          <button type="button" class="btn" id="btnAddFromSearch">Agregar</button>
+        </div>
+
+        <div style="overflow-x:auto">
+          <table id="itemsTable">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th style="width:90px">Precio</th>
+                <th style="width:90px">Cantidad</th>
+                <th style="width:110px">Subtotal</th>
+                <th style="width:70px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button type="button" id="btnAddRow" class="btn">+ Agregar fila</button>
+          <button type="button" id="btnClearRows" class="btn ghost">Limpiar</button>
+        </div>
+      </section>
+
+      <section style="margin-top:18px">
+        <h2 style="font-size:16px;margin:6px 0 10px">Condiciones de Pago y Envío</h2>
+        <div class="grid cols-2">
+          <div>
+            <label>Forma de pago</label>
+            <select id="paymentMethod">
+              <option value="contado">Contado</option>
+              <option value="credito">Crédito (30 días)</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </div>
+          <div>
+            <label>Dirección de envío</label>
+            <input type="text" id="shippingAddress" placeholder="Calle, distrito, ciudad" />
+          </div>
+        </div>
+      </section>
+
+      <div class="summary">
+        <div class="card" style="text-align:left">
+          <div class="small">Subtotal</div>
+          <div id="displaySubtotal">S/ 0.00</div>
+        </div>
+        <div class="card" style="text-align:left">
+          <div class="small">IGV (18%)</div>
+          <div id="displayTax">S/ 0.00</div>
+        </div>
+        <div class="card" style="text-align:left">
+          <div class="small">Total</div>
+          <div id="displayTotal" style="font-weight:700">S/ 0.00</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button type="button" id="btnSaveDraft" class="btn ghost">Guardar borrador</button>
+        <button type="submit" class="btn">Registrar venta</button>
+      </div>
+      <div id="formMessage" style="margin-top:12px"></div>
+    </form>
+
+    <footer style="margin-top:18px;font-size:13px;color:var(--muted)">Sistema de Ventas - Formulario demo • Puedes personalizar campos, impuestos y reglas.</footer>
+  </div>
+
+<script>
+(function(){
+  // Demo: catálogo mínimo (en un sistema real vendría del servidor)
+  const catalog = [
+    {id: 'P001', name: 'Teclado mecánico', price: 199.90},
+    {id: 'P002', name: 'Mouse inalámbrico', price: 79.50},
+    {id: 'P003', name: 'Cable HDMI 2m', price: 29.90},
+    {id: 'P004', name: 'Monitor 24"', price: 599.00}
+  ];
+
+  const TAX_RATE = 0.18; // IGV 18%
+  const itemsTableBody = document.querySelector('#itemsTable tbody');
+  const searchInput = document.getElementById('searchProduct');
+  const btnAddFromSearch = document.getElementById('btnAddFromSearch');
+  const btnAddRow = document.getElementById('btnAddRow');
+  const btnClearRows = document.getElementById('btnClearRows');
+  const displaySubtotal = document.getElementById('displaySubtotal');
+  const displayTax = document.getElementById('displayTax');
+  const displayTotal = document.getElementById('displayTotal');
+  const saleForm = document.getElementById('saleForm');
+  const btnSaveDraft = document.getElementById('btnSaveDraft');
+  const formMessage = document.getElementById('formMessage');
+
+  function currency(v){ return 'S/ ' + Number(v).toFixed(2); }
+
+  function createRow(data={id:'', name:'', price:0, qty:1}){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <input type="text" class="productName" value="${escapeHtml(data.name)}" placeholder="Nombre del producto" />
+        <div class="small" style="margin-top:4px">SKU: <span class="small sku">${escapeHtml(data.id)}</span></div>
+      </td>
+      <td><input type="number" class="price" value="${Number(data.price).toFixed(2)}" step="0.01" min="0" /></td>
+      <td><input type="number" class="qty" value="${data.qty}" min="1" /></td>
+      <td class="text-right"><span class="subtotal">${currency(data.price * data.qty)}</span></td>
+      <td class="text-right"><button type="button" class="btn ghost btnRemove">Eliminar</button></td>
+    `;
+
+    // events
+    tr.querySelector('.price').addEventListener('input', updateAll);
+    tr.querySelector('.qty').addEventListener('input', updateAll);
+    tr.querySelector('.productName').addEventListener('input', updateAll);
+    tr.querySelector('.btnRemove').addEventListener('click', ()=>{ tr.remove(); updateAll(); });
+
+    itemsTableBody.appendChild(tr);
+    return tr;
+  }
+
+  function updateAll(){
+    let subtotal = 0;
+    itemsTableBody.querySelectorAll('tr').forEach(tr=>{
+      const price = parseFloat(tr.querySelector('.price').value) || 0;
+      const qty = parseInt(tr.querySelector('.qty').value) || 0;
+      const st = price * qty;
+      tr.querySelector('.subtotal').textContent = currency(st);
+      subtotal += st;
+    });
+    const tax = subtotal * TAX_RATE;
+    const total = subtotal + tax;
+    displaySubtotal.textContent = currency(subtotal);
+    displayTax.textContent = currency(tax);
+    displayTotal.textContent = currency(total);
+  }
+
+  function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // actions
+  btnAddRow.addEventListener('click', ()=> createRow());
+  btnClearRows.addEventListener('click', ()=>{ itemsTableBody.innerHTML=''; updateAll(); });
+
+  btnAddFromSearch.addEventListener('click', ()=>{
+    const q = searchInput.value.trim().toLowerCase();
+    if(!q) return createRow();
+    const found = catalog.find(p=> p.name.toLowerCase().includes(q) || p.id.toLowerCase() === q);
+    if(found) createRow({id:found.id,name:found.name,price:found.price});
+    else createRow({name:searchInput.value,price:0,qty:1});
+    searchInput.value = '';
+    updateAll();
+  });
+
+  // Save draft to localStorage
+  btnSaveDraft.addEventListener('click', ()=>{
+    const payload = formToJSON();
+    localStorage.setItem('saleDraft', JSON.stringify(payload));
+    showMessage('Borrador guardado localmente.', false);
+  });
+
+  // load draft on start
+  (function loadDraft(){
+    const raw = localStorage.getItem('saleDraft');
+    if(!raw) { createRow(); updateAll(); return; }
+    try{
+      const payload = JSON.parse(raw);
+      document.getElementById('customerName').value = payload.customer.name || '';
+      document.getElementById('customerDoc').value = payload.customer.doc || ''; 
+      document.getElementById('customerEmail').value = payload.customer.email || '';
+      document.getElementById('customerPhone').value = payload.customer.phone || '';
+      document.getElementById('shippingAddress').value = payload.shippingAddress || '';
+      document.getElementById('paymentMethod').value = payload.paymentMethod || 'contado';
+      itemsTableBody.innerHTML='';
+      (payload.items || []).forEach(it => createRow(it));
+      updateAll();
+      showMessage('Borrador cargado.', false);
+    }catch(e){ createRow(); updateAll(); }
+  })();
+
+  function formToJSON(){
+    const items = [];
+    itemsTableBody.querySelectorAll('tr').forEach(tr=>{
+      items.push({
+        id: tr.querySelector('.sku') ? tr.querySelector('.sku').textContent : '',
+        name: tr.querySelector('.productName').value,
+        price: parseFloat(tr.querySelector('.price').value) || 0,
+        qty: parseInt(tr.querySelector('.qty').value) || 0
+      });
+    });
+    const subtotal = Number(displaySubtotal.textContent.replace(/[^0-9.-]+/g,'')) || 0;
+    const tax = Number(displayTax.textContent.replace(/[^0-9.-]+/g,'')) || 0;
+    const total = Number(displayTotal.textContent.replace(/[^0-9.-]+/g,'')) || 0;
+
+    return {
+      customer: {
+        name: document.getElementById('customerName').value,
+        doc: document.getElementById('customerDoc').value,
+        email: document.getElementById('customerEmail').value,
+        phone: document.getElementById('customerPhone').value
+      },
+      items,
+      paymentMethod: document.getElementById('paymentMethod').value,
+      shippingAddress: document.getElementById('shippingAddress').value,
+      totals: { subtotal, tax, total },
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  function showMessage(msg, isError){
+    formMessage.innerHTML = '';
+    const p = document.createElement('div');
+    p.textContent = msg;
+    p.className = isError ? 'error' : 'small';
+    formMessage.appendChild(p);
+  }
+
+  saleForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    // validaciones simples
+    const name = document.getElementById('customerName').value.trim();
+    if(!name){ showMessage('El nombre del cliente es obligatorio.', true); return; }
+    if(itemsTableBody.querySelectorAll('tr').length === 0){ showMessage('Agrega al menos 1 item.', true); return; }
+
+    const payload = formToJSON();
+
+    // En un sistema real harías un fetch POST aquí. En este demo solo lo mostramos en consola.
+    console.log('Enviando payload de venta:', payload);
+
+    // Simular envío
+    showMessage('Venta registrada (demo). Revisa la consola para ver el JSON.', false);
+    // limpiar form
+    // saleForm.reset(); itemsTableBody.innerHTML=''; createRow(); updateAll();
+  });
+
+  // initial
+  updateAll();
+})();
+</script>
+</body>
+</html>
