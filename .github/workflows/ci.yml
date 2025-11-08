@@ -1,45 +1,20 @@
-name: 🚀 Despliegue del Sistema de Ventas
+name: 🚀 Actualización automática del sistema de ventas
 
 on:
   push:
     branches:
-      - main  # Se ejecuta cada vez que hagas push a la rama main
+      - main  # Se ejecuta cada vez que subas cambios a 'main'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1️⃣ - Descargar el código del repositorio
-      - name: 📦 Checkout del código
+      - name: 📦 Descargar código
         uses: actions/checkout@v3
 
-      # Paso 2️⃣ - Configurar Node (solo si tu sitio usa dependencias npm)
-      # Si tu proyecto es HTML puro, puedes omitir este bloque.
-      - name: ⚙️ Configurar Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      # Paso 3️⃣ - Instalar dependencias (opcional si tienes un package.json)
-      - name: 📥 Instalar dependencias
-        run: |
-          if [ -f package.json ]; then
-            npm install
-          fi
-
-      # Paso 4️⃣ - Construir proyecto (si tienes build)
-      - name: 🏗️ Construir el proyecto
-        run: |
-          if [ -f package.json ]; then
-            npm run build || echo "No hay script de build, continuando..."
-          fi
-
-      # Paso 5️⃣ - Desplegar a GitHub Pages
       - name: 🚀 Desplegar en GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist  # Si usas build
-          # Si tu proyecto es HTML puro sin build, usa:
-          # publish_dir: ./
+          publish_dir: ./
